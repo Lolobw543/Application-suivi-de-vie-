@@ -1,10 +1,16 @@
 import { Sparkles, ChevronRight, Clock, Mic, Award } from 'lucide-react';
-import type { JournalEntry, UserGoal } from '../types';
 
+import type { JournalEntry, UserGoal, DailyHabit, MoodEnergyLog } from '../types';
+import { DailyHabitsCard } from '../components/DailyHabitsCard';
+import { MoodEnergyCard } from '../components/MoodEnergyCard';
 
 interface HomePageProps {
   goal: UserGoal;
   latestEntry?: JournalEntry;
+  habits: DailyHabit[];
+  dailyMood: MoodEnergyLog;
+  onToggleHabit: (id: string) => void;
+  onUpdateMood: (log: MoodEnergyLog) => void;
   onStartVoice: () => void;
   onNavigateToDirection: () => void;
   onNavigateToJournal: () => void;
@@ -13,6 +19,10 @@ interface HomePageProps {
 export const HomePage: React.FC<HomePageProps> = ({
   goal,
   latestEntry,
+  habits,
+  dailyMood,
+  onToggleHabit,
+  onUpdateMood,
   onStartVoice,
   onNavigateToDirection,
   onNavigateToJournal,
@@ -31,7 +41,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   return (
     <div className="space-y-4 pb-28 animate-fadeIn select-none">
       
-      {/* 1. Carte principale verte (Exacte Image 1) */}
+      {/* 1. Carte calendrier verte (Fidélité iOS & Maquette) */}
       <div className="bg-gradient-to-br from-[#D9F7BD] via-[#D3F5B4] to-[#C9F0A5] rounded-[32px] p-5 shadow-[0_10px_25px_rgba(180,230,140,0.25)] border border-[#C5EE9E] relative overflow-hidden transition-all duration-300">
         <div className="flex items-start justify-between gap-3">
           
@@ -157,19 +167,31 @@ export const HomePage: React.FC<HomePageProps> = ({
 
       </div>
 
-      {/* 3. Grande carte blanche de progression personnelle */}
-      <div className="bg-white rounded-[32px] p-5 shadow-[0_8px_25px_rgba(0,0,0,0.04)] border border-neutral-100/90 space-y-4">
+      {/* 3. Habitudes & Rituels du Jour (Apple Fitness / Habits tracker) */}
+      <DailyHabitsCard
+        habits={habits}
+        onToggleHabit={onToggleHabit}
+      />
+
+      {/* 4. Suivi de l'Humeur & de l'Énergie Vitale */}
+      <MoodEnergyCard
+        currentLog={dailyMood}
+        onUpdateLog={onUpdateMood}
+      />
+
+      {/* 5. Grande carte blanche de progression personnelle & Cap */}
+      <div className="bg-white rounded-[32px] p-5 shadow-[0_8px_25px_rgba(0,0,0,0.03)] border border-neutral-100/90 space-y-4">
         
         {/* Header card */}
         <div className="flex items-center justify-between">
           <span className="text-base font-bold text-neutral-900">
-            Ta progression
+            Ta progression & Cap
           </span>
           <button
             onClick={onNavigateToDirection}
             className="flex items-center gap-1 text-xs font-semibold text-neutral-500 hover:text-neutral-900 bg-neutral-100/80 hover:bg-neutral-100 px-3 py-1.5 rounded-full transition-colors"
           >
-            <span>Voir le cap</span>
+            <span>Voir la boussole</span>
             <ChevronRight size={13} />
           </button>
         </div>
@@ -180,7 +202,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-pink-500" />
               <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
-                Cap actuel
+                Cap actif
               </p>
             </div>
             <h3 className="text-base font-bold text-neutral-900 tracking-tight leading-snug">
@@ -202,7 +224,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         {/* Segmented Pill Progress Bar */}
         <div className="space-y-1.5 pt-1">
           <div className="flex items-center justify-between text-[11px] font-semibold text-neutral-500">
-            <span>Régularité du cycle</span>
+            <span>Régularité globale</span>
             <span className="text-neutral-900 font-bold">{goal.alignmentScore}%</span>
           </div>
 
@@ -224,26 +246,31 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
         </div>
 
-        {/* Habits Quick Pills */}
-        <div className="grid grid-cols-3 gap-2 pt-1 border-t border-neutral-100">
+        {/* Pillars Quick Summary */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-neutral-100">
           {goal.pillars.map((pillar) => (
             <div
               key={pillar.id}
-              className="bg-neutral-50 rounded-2xl p-2.5 text-center border border-neutral-100 space-y-0.5"
+              className="bg-neutral-50 rounded-2xl p-2.5 border border-neutral-100 space-y-0.5"
             >
               <p className="text-[10px] font-medium text-neutral-500 truncate">
-                {pillar.title.split('&')[0]}
+                {pillar.title}
               </p>
-              <p className="text-xs font-bold text-neutral-900">
-                {pillar.currentCount}/{pillar.targetCount}
-              </p>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-neutral-900">
+                  {pillar.progressPercent}%
+                </span>
+                <span className="text-[10px] text-neutral-400">
+                  {pillar.currentCount}/{pillar.targetCount}
+                </span>
+              </div>
             </div>
           ))}
         </div>
 
       </div>
 
-      {/* 4. Carte "Ce que l'analyse retient" */}
+      {/* 6. Carte "Ce que l'analyse retient" */}
       <div className="bg-gradient-to-br from-neutral-50 to-neutral-100/70 rounded-[30px] p-5 shadow-[0_4px_15px_rgba(0,0,0,0.02)] border border-neutral-200/60 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -270,7 +297,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             onClick={onNavigateToJournal}
             className="text-[11px] font-semibold text-neutral-600 hover:text-neutral-900 flex items-center gap-1"
           >
-            <span>Voir le dernier récit du journal</span>
+            <span>Consulter le récit du journal</span>
             <ChevronRight size={12} />
           </button>
         )}

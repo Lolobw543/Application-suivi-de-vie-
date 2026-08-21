@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { AudioRecorderModal } from './components/AudioRecorderModal';
@@ -6,19 +7,21 @@ import { AnalysisConfirmationModal } from './components/AnalysisConfirmationModa
 import { SearchModal } from './components/SearchModal';
 import { NotificationsModal } from './components/NotificationsModal';
 import { EditDirectionModal } from './components/EditDirectionModal';
+import { ProfileModal } from './components/ProfileModal';
 import { HomePage } from './pages/HomePage';
 import { JournalPage } from './pages/JournalPage';
 import { DirectionPage } from './pages/DirectionPage';
 import { storageService } from './services/storageService';
-import type { JournalEntry, UserGoal, TabType } from './types';
+import type { JournalEntry, UserGoal, TabType, DailyHabit, MoodEnergyLog } from './types';
 import type { AnalysisResult } from './services/localAnalysisEngine';
 import { CheckCircle2 } from 'lucide-react';
-
 
 export function App() {
   const [currentTab, setCurrentTab] = useState<TabType>('home');
   const [entries, setEntries] = useState<JournalEntry[]>(() => storageService.getEntries());
   const [goal, setGoal] = useState<UserGoal>(() => storageService.getGoal());
+  const [habits, setHabits] = useState<DailyHabit[]>(() => storageService.getHabits());
+  const [dailyMood, setDailyMood] = useState<MoodEnergyLog>(() => storageService.getDailyMood());
 
   // Modal states
   const [isRecorderOpen, setIsRecorderOpen] = useState(false);
@@ -30,6 +33,7 @@ export function App() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isEditDirectionOpen, setIsEditDirectionOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -41,6 +45,17 @@ export function App() {
 
   const handleOpenRecorder = () => {
     setIsRecorderOpen(true);
+  };
+
+  const handleToggleHabit = (id: string) => {
+    const updated = storageService.toggleHabit(id);
+    setHabits(updated);
+  };
+
+  const handleUpdateMood = (updatedLog: MoodEnergyLog) => {
+    storageService.saveDailyMood(updatedLog);
+    setDailyMood(updatedLog);
+    showToast('Humeur enregistrée.');
   };
 
   const handleAnalysisComplete = (
@@ -59,9 +74,9 @@ export function App() {
     const updatedEntries = storageService.saveEntry(newEntry);
     setEntries(updatedEntries);
     setGoal(storageService.getGoal());
+    setHabits(storageService.getHabits());
     setIsConfirmationOpen(false);
     showToast('Journée enregistrée. À demain.');
-    // Switch to journal or home
     setCurrentTab('journal');
   };
 
@@ -87,7 +102,7 @@ export function App() {
         <Header
           onOpenSearch={() => setIsSearchOpen(true)}
           onOpenNotifications={() => setIsNotificationsOpen(true)}
-          onOpenProfile={() => setIsEditDirectionOpen(true)}
+          onOpenProfile={() => setIsProfileOpen(true)}
           unreadCount={goal.reminderEnabled ? 1 : 0}
         />
 
@@ -97,6 +112,10 @@ export function App() {
             <HomePage
               goal={goal}
               latestEntry={entries[0]}
+              habits={habits}
+              dailyMood={dailyMood}
+              onToggleHabit={handleToggleHabit}
+              onUpdateMood={handleUpdateMood}
               onStartVoice={handleOpenRecorder}
               onNavigateToDirection={() => setCurrentTab('direction')}
               onNavigateToJournal={() => setCurrentTab('journal')}
@@ -120,7 +139,7 @@ export function App() {
           )}
         </main>
 
-        {/* Floating Bottom Nav (Exact Image 2) */}
+        {/* Floating Bottom Nav (Image 2 Preserved) */}
         <BottomNav
           currentTab={currentTab}
           onTabChange={(tab) => setCurrentTab(tab)}
@@ -170,6 +189,14 @@ export function App() {
           onClose={() => setIsEditDirectionOpen(false)}
           goal={goal}
           onSaveGoal={handleUpdateGoal}
+        />
+
+        <ProfileModal
+          isOpen={isProfileOpen}
+          onClose={() => setIsProfileOpen(false)}
+          goal={goal}
+          totalEntriesCount={entries.length}
+          onOpenNotifications={() => setIsNotificationsOpen(true)}
         />
 
       </div>

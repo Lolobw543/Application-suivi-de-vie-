@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Compass, Edit3, Palette, Sun, BookOpen, Bell, Check, Smartphone, Clock } from 'lucide-react';
-import type { UserGoal } from '../types';
+import { Compass, Edit3, Palette, Sun, BookOpen, Activity, Bell, Check, Smartphone, Clock, Flame, TrendingUp } from 'lucide-react';
 
+import type { UserGoal } from '../types';
 import { notificationService } from '../services/notificationService';
 import { storageService } from '../services/storageService';
 
@@ -25,11 +25,13 @@ export const DirectionPage: React.FC<DirectionPageProps> = ({
     switch (iconName) {
       case 'Palette':
         return <Palette size={20} className="text-pink-600" />;
+      case 'Activity':
+        return <Activity size={20} className="text-emerald-600" />;
       case 'Sun':
         return <Sun size={20} className="text-blue-600" />;
       case 'BookOpen':
       default:
-        return <BookOpen size={20} className="text-emerald-600" />;
+        return <BookOpen size={20} className="text-purple-600" />;
     }
   };
 
@@ -77,10 +79,10 @@ export const DirectionPage: React.FC<DirectionPageProps> = ({
       <div className="flex items-center justify-between px-1">
         <div>
           <h1 className="text-2xl font-extrabold text-neutral-900 tracking-tight m-0">
-            Mon Cap de vie
+            Boussole de vie
           </h1>
           <p className="text-xs text-neutral-500 font-medium">
-            La boussole qui guide tes bilans du soir
+            Tes intentions profondes et tes piliers d'équilibre
           </p>
         </div>
 
@@ -89,7 +91,7 @@ export const DirectionPage: React.FC<DirectionPageProps> = ({
           className="px-3.5 py-2 bg-neutral-900 hover:bg-black text-white text-xs font-semibold rounded-full shadow-sm flex items-center gap-1.5 active:scale-95 transition-all"
         >
           <Edit3 size={13} />
-          <span>Modifier</span>
+          <span>Ajuster mon cap</span>
         </button>
       </div>
 
@@ -98,15 +100,16 @@ export const DirectionPage: React.FC<DirectionPageProps> = ({
         <div className="flex items-start justify-between">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[11px] font-semibold text-amber-300">
             <Compass size={13} />
-            <span>Cap prioritaire</span>
+            <span>Cap prioritaire actif</span>
           </div>
-          <span className="text-xs font-semibold text-neutral-400">
-            Jour {goal.activeSinceDays}
-          </span>
+          <div className="flex items-center gap-1 text-xs font-bold text-amber-300">
+            <Flame size={14} className="fill-amber-300" />
+            <span>{goal.streakDays} jours consécutifs</span>
+          </div>
         </div>
 
-        <div className="space-y-1">
-          <h2 className="text-xl font-bold tracking-tight text-white m-0">
+        <div className="space-y-1 pt-1">
+          <h2 className="text-xl font-bold tracking-tight text-white m-0 leading-snug">
             {goal.mainDirection}
           </h2>
           <p className="text-xs text-neutral-300 leading-relaxed font-light">
@@ -114,20 +117,23 @@ export const DirectionPage: React.FC<DirectionPageProps> = ({
           </p>
         </div>
 
-        <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs">
+        <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-neutral-300 font-medium">Alignement global</span>
+            <span className="text-neutral-300 font-medium">Cohérence & Alignement</span>
           </div>
-          <span className="font-bold text-white text-sm">{goal.alignmentScore}%</span>
+          <span className="font-extrabold text-white text-sm">{goal.alignmentScore}%</span>
         </div>
       </div>
 
-      {/* 3 Life Pillars */}
+      {/* 4 Life Pillars */}
       <div className="space-y-2.5">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-500 px-1">
-          Mes 3 piliers d'équilibre
-        </h3>
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-500">
+            Mes 4 piliers de vie
+          </h3>
+          <span className="text-[11px] text-neutral-400 font-medium">Ajustables en direct</span>
+        </div>
 
         {goal.pillars.map((pillar) => (
           <div
@@ -176,7 +182,7 @@ export const DirectionPage: React.FC<DirectionPageProps> = ({
                   {pillar.currentCount} / {pillar.targetCount} {pillar.unit}
                 </span>
 
-                {/* Quick adjustments buttons */}
+                {/* Quick adjustment buttons */}
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => handleAdjustPillar(pillar.id, -1)}
@@ -198,6 +204,27 @@ export const DirectionPage: React.FC<DirectionPageProps> = ({
 
           </div>
         ))}
+      </div>
+
+      {/* Weekly Review & Trend Card */}
+      <div className="bg-white rounded-[28px] p-5 border border-neutral-100/90 shadow-[0_4px_16px_rgba(0,0,0,0.03)] space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <TrendingUp size={16} />
+            </div>
+            <h4 className="text-xs font-bold text-neutral-900">
+              Bilan & Dynamique de la semaine
+            </h4>
+          </div>
+          <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+            En hausse +12%
+          </span>
+        </div>
+
+        <p className="text-xs text-neutral-600 leading-relaxed">
+          Ta régularité sur les rituels du matin et le récit du soir renforce ton élan. Tes projets créatifs ont connu 4 sessions complètes cette semaine.
+        </p>
       </div>
 
       {/* Reminder & Notification Card */}
